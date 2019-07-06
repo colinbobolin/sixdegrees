@@ -1,5 +1,3 @@
-#testing push to master
-
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -11,15 +9,13 @@ def find_connection__between_actors(actor1, actor2):
     pass
 
 
-# TODO get regular expression to return the first link that has no trailing ?ref
-def search_for_actor(actor):
+def get_possible_actor_addresses_by_name(actor):
     html = get_html_for_actor_search(get_search_url(actor))
-    html.find_all(text=re.compile('name/nm[0-9]{7}'))
+    possible_actor_addresses = []
     for link in html.find_all('a'):
-        if "/name/nm" in link.get('href'):
-            print(BASE_WEB_ADDRESS + link.get('href'))
-            # return BASE_WEB_ADDRESS + link
-    pass
+        if re.compile("/name/nm[0-9]{7}$").search(link.get('href')):
+            possible_actor_addresses.append(BASE_WEB_ADDRESS + link.get('href'))
+    return possible_actor_addresses
 
 
 # advanced search URL for an actor.
@@ -35,7 +31,9 @@ def get_html_for_actor_search(url):
 def main():
     # url = get_search_url("Will Smith")
     # html = get_html_for_actor_search(url)
-    search_for_actor("Will Smith")
+    possible_actor_addresses = get_possible_actor_addresses_by_name("Will Smith")
+    #for actor in possible_actor_addresses: print(actor)
+    # print(search_for_actor("Will Smith") + "{.__name__}")
 
 
 main()

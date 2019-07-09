@@ -14,7 +14,8 @@ class MyTestCase(unittest.TestCase):
 
     def test_actor_image(self):
         test_movie = Movie("tt0448157")
-        self.assertEqual("https://m.media-amazon.com/images/M/MV5BMTgyMzc4ODU3NV5BMl5BanBnXkFtZTcwNjk5Mzc1MQ@@._V1_.jpg",
+        self.assertEqual("https://m.media-amazon.com/images/"
+                         "M/MV5BMTgyMzc4ODU3NV5BMl5BanBnXkFtZTcwNjk5Mzc1MQ@@._V1_.jpg",
                          test_movie.image)
 
     def test_movie_cast(self):

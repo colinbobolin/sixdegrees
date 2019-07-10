@@ -3,10 +3,11 @@ import requests
 import re
 import json
 from .movie import Movie
+from .actor import Actor
 
 ROOT_URL = "https://www.imdb.com/"
-ACTOR_ID_SHAPE = re.compile("nm[0-9]{7}/?$")
-MOVIE_ID_SHAPE = re.compile("tt[0-9]{7}/?$")
+ACTOR_ID_SHAPE = re.compile("nm[0-9]{7}")
+MOVIE_ID_SHAPE = re.compile("tt[0-9]{7}")
 SEARCH_FOR = "search/"
 NAME_ID = "name/"
 TITLE_ID = "title/"
@@ -17,10 +18,25 @@ COUNT_25 = "&count=25"
 
 
 def search_for_actor_by_name(name):
+    actor_ids = get_actor_ids_for_search_by_name(name)
+    actor_ids = get_unique_items(actor_ids)
+    return instantiate_actors_from_ids(actor_ids)
+
+
+def get_actor_ids_for_search_by_name(name):
     url = get_search_url(name)
     html_soup = get_html_soup(url)
-    # print(html_soup)
-    return get_actor_ids_from_html_soup(html_soup)
+    actor_ids = get_actor_ids_from_html_soup(html_soup)
+    #print(actor_ids)
+    return actor_ids
+
+
+def get_unique_items(iterable):
+    results = []
+    for item in iterable:
+        if item not in results:
+            results.append(item)
+    return results
 
 
 def get_html_soup(url):
@@ -28,17 +44,17 @@ def get_html_soup(url):
 
 
 def get_search_url(name):
-    print(ROOT_URL + SEARCH_FOR + NAME_ID + BY_NAME_STRING + name.replace(" ", "+"))
+    #print(ROOT_URL + SEARCH_FOR + NAME_ID + BY_NAME_STRING + name.replace(" ", "+"))
     return ROOT_URL + SEARCH_FOR + NAME_ID + BY_NAME_STRING + name.replace(" ", "+")
 
 
 def get_actor_url(actor_id):
-    print(ROOT_URL + NAME_ID + actor_id)
+    #print("getting actor url: " + ROOT_URL + NAME_ID + actor_id)
     return ROOT_URL + NAME_ID + actor_id
 
 
 def get_movie_url(movie_id):
-    print(ROOT_URL + TITLE_ID + movie_id)
+    #print("getting movie url: " + ROOT_URL + TITLE_ID + movie_id)
     return ROOT_URL + TITLE_ID + movie_id
 
 
@@ -54,42 +70,40 @@ def get_image_from_html_soup(html_soup):
 
 
 def get_actor_ids_from_html_soup(html_soup):
-    return get_href_from_html_soup_matching_shape(html_soup, ACTOR_ID_SHAPE)
+    return get_ids_from_html_soup_matching_shape(html_soup, ACTOR_ID_SHAPE)
 
 
-def get_movie_urls_from_html_soup(html_soup):
-    return get_href_from_html_soup_matching_shape(html_soup, MOVIE_ID_SHAPE)
+def get_movie_ids_from_html_soup(html_soup):
+    return get_ids_from_html_soup_matching_shape(html_soup, MOVIE_ID_SHAPE)
 
 
 def get_25_movies_for_actor_id(actor_id):
-    # print(f"getting movies for actor id: {actor_id}\n{ROOT_URL + SEARCH_FOR + TITLE_ID + BY_ROLE + actor_id}")
+    #print(f"getting movies for actor id: {actor_id}\n{ROOT_URL + SEARCH_FOR + TITLE_ID + BY_ROLE + actor_id}")
     html_soup = get_html_soup(ROOT_URL + SEARCH_FOR + TITLE_ID + BY_ROLE + actor_id + COUNT_25)
-    movie_ids = get_href_from_html_soup_matching_shape(html_soup, MOVIE_ID_SHAPE)
+    movie_ids = get_ids_from_html_soup_matching_shape(html_soup, MOVIE_ID_SHAPE)
     return instantiate_movies_from_ids(movie_ids)
 
 
 def instantiate_movies_from_ids(movie_ids):
-    movies = []
-    for movie_id in movie_ids:
-        # print(movie_id)
-        append_element_to_list_if_not_duplicate(Movie(movie_id), movies)
-    return movies
+    return get_unique_items([Movie(movie_id) for movie_id in movie_ids])
+
+
+def instantiate_actors_from_ids(actor_ids):
+    return get_unique_items([Actor(actor_id) for actor_id in actor_ids])
 
 
 def get_cast_list_for_movie_id(movie_id):
     html_soup = get_html_soup(ROOT_URL + SEARCH_FOR + NAME_ID + BY_ROLE + movie_id)
-    return get_href_from_html_soup_matching_shape(html_soup, ACTOR_ID_SHAPE)
+    actor_ids = get_ids_from_html_soup_matching_shape(html_soup, ACTOR_ID_SHAPE)
+    return instantiate_actors_from_ids(actor_ids)
 
 
-def get_a_tags_from_html_soup(html_soup):
+def get_a_tags(html_soup):
     return html_soup.find_all('a')
 
 
 def get_href_list_from_bs4_result_set(bs4_result_set):
-    href_list = []
-    for a_tag in bs4_result_set:
-        append_element_to_list_if_not_duplicate(a_tag.get('href'), href_list)
-    return href_list
+    return get_unique_items([a_tag.get('href') for a_tag in bs4_result_set])
 
 
 def append_element_to_list_if_not_duplicate(element, list):
@@ -97,23 +111,22 @@ def append_element_to_list_if_not_duplicate(element, list):
         list.append(element)
 
 
-def element_matches_shape(element, shape):
-    return shape.search(element)
-
-
-def get_href_from_html_soup_matching_shape(html_soup, shape):
+def get_ids_from_html_soup_matching_shape(html_soup, shape):
     results = []
-    a_tag_list = get_a_tags_from_html_soup(html_soup)
-    href_list = get_href_list_from_bs4_result_set(a_tag_list)
+    page_content = html_soup.find(id="pagecontent")
+    a_tag_bs4_result_set = get_a_tags(page_content)
+    href_list = get_href_list_from_bs4_result_set(a_tag_bs4_result_set)
     for href in href_list:
         if shape.search(href):
-            print(href)
-            append_element_to_list_if_not_duplicate(href, results)
-    return results
+            #print("found an href in the html" + href)
+            #print(f"appending {shape.findall(href)} to the results list")
+            results.extend(shape.findall(href))
+    return get_unique_items(results)
 
 
 def get_json_value_from_html_soup_matching_json_key(html_soup, json_key):
     html_of_json_data = html_soup.find('script', type="application/ld+json").text
+    #print(html_soup.find('script', type="application/ld+json").text)
     json_data = json.loads(html_of_json_data)
     return json_data[json_key]
 

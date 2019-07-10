@@ -18,10 +18,6 @@ class MyTestCase(unittest.TestCase):
                          "M/MV5BNTczMzk1MjU1MV5BMl5BanBnXkFtZTcwNDk2MzAyMg@@._V1_.jpg",
                          test_actor.image)
 
-    #def test_actor_movies(self):
-    #    test_actor = Actor('nm0000226')
-    #    self.assertIn("https://www.imdb.com//title/tt6139732/", test_actor.movies)
-
 
 if __name__ == '__main__':
     unittest.main()

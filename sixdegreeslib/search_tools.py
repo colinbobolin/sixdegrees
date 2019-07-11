@@ -4,6 +4,8 @@ import re
 import json
 from .movie import Movie
 from .actor import Actor
+from sixdegreeslib import movie
+from sixdegreeslib import actor
 
 ROOT_URL = "https://www.imdb.com/"
 ACTOR_ID_SHAPE = re.compile("nm[0-9]{7}")
@@ -18,9 +20,11 @@ COUNT_25 = "&count=25"
 
 
 def search_for_actor_by_name(name):
+    print(f"Searching IMDB for: {name}.")
     actor_ids = get_actor_ids_for_search_by_name(name)
     actor_ids = get_unique_items(actor_ids)
-    return instantiate_actors_from_ids(actor_ids)
+    print(f"Found {len(actor_ids)} possible matches! Instantiating these actors for you. This may take a while...")
+    return instantiate_actors_from_ids(actor_ids[:5])
 
 
 def get_actor_ids_for_search_by_name(name):
@@ -85,10 +89,16 @@ def get_25_movies_for_actor_id(actor_id):
 
 
 def instantiate_movies_from_ids(movie_ids):
+    for movie_id in movie_ids:
+        if movie_id in movie.movie_library.keys():
+            movie_ids.remove(movie_id)
     return get_unique_items([Movie(movie_id) for movie_id in movie_ids])
 
 
 def instantiate_actors_from_ids(actor_ids):
+    for actor_id in actor_ids:
+        if actor_id in actor.actor_library.keys():
+            actor_ids.remove(actor_id)
     return get_unique_items([Actor(actor_id) for actor_id in actor_ids])
 
 

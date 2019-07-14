@@ -5,7 +5,6 @@ movie_library = {}
 
 class Movie:
 
-    # TODO save the @genre json key and if it is TVSeries, it is not a valid movie
     def __init__(self, movie_id):
         self.movie_id = movie_id
         self.url = search_tools.get_movie_url(self.movie_id)
@@ -13,21 +12,18 @@ class Movie:
         self.name = search_tools.get_name_from_html_soup(self.html_soup)
         self.image = search_tools.get_image_from_html_soup(self.html_soup)
         self.cast_list = []
+        self.genre = self.get_movie_genre()
         movie_library.update({self.movie_id: self})
 
     def __repr__(self):
-        return f"{self.movie_id}: {self.name}"
+        return f"{self.movie_id}: {self.name} genre:{self.genre} URL:{self.url}"
 
     def get_cast_list(self):
         self.cast_list = search_tools.get_cast_list_for_movie_id(self.movie_id)
+        return self.cast_list
 
-    def search_for(self, actor, degree, path):
-        self.get_cast_list()
-        for next_actor in self.cast_list:
-            print(f"{next_actor.name}, and...")
-            next_actor.search_for(actor, degree=degree+1, path=path+f"{self.name}-")
-        return path
+    def get_movie_genre(self):
+        return search_tools.get_json_value_from_html_soup_matching_json_key(self.html_soup, 'genre')
 
-
-
-
+    def get_movie_type(self):
+        return search_tools.get_json_value_from_html_soup_matching_json_key(self.html_soup, '@type')

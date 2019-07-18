@@ -1,25 +1,20 @@
-from sixdegreeslib import search_tools
-from sixdegreeslib.actor import Actor
-from sixdegreeslib.game import Game
+from sixdegreeslib.network import Network
+from sixdegreeslib import actor_search
+import time
+
+def main():
+    start_actor = actor_search.get_actor_search_results_by_name("Cillian Murphy")[0]
+    target_actor = actor_search.get_actor_search_results_by_name("Elijah Wood")[0]
+    start_actor_id = start_actor[1]
+    target_actor_id = target_actor[1]
+    start_time = time.perf_counter()
+    game = Network(start_actor_id, target_actor_id)
+    game.search()
+    end_time = time.perf_counter()
+    time_taken = end_time - start_time
+    print(f"Time Taken: {time_taken}")
 
 
-class SixDegrees:
 
-    def main():
-        while(True):
-            Game()
-        #possible_actors = []
-        #while len(possible_actors) == 0:
-        #    possible_actors = search_tools.search_for_actor_by_name(input("Enter a name: "))
-        #for actor in possible_actors:
-        #    print(actor)
-        #actor1 = possible_actors[0]
-
-        #actor1.get_top_25_movies()
-        #movies1 = actor1.movies
-        #actors2 = [Actor(actor_id) for actor_id in (movie.get_cast_list() for movie in movies1)]
-        #for movie in movies1:
-            #print(movie.name)
-
-    if __name__=='__main__':
-        main()
+if __name__=='__main__':
+    main()

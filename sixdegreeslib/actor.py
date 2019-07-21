@@ -11,9 +11,13 @@ class Actor:
         return self._id
 
     @property
-    def url(self):
-        print("getter of url called")
+    def actor_page_url(self):
+        print("getter of actor_page_url called")
         return f"https://www.imdb.com/name/{self.id}"
+
+    @property
+    def movie_search_url(self):
+        return f"https://www.imdb.com/search/title/?role={self.id}&sort=boxoffice_gross_us,desc"
 
     @property
     def name(self):

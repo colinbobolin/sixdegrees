@@ -66,10 +66,7 @@ class Network:
             self.searched.append(actor)
 
     def get_movies(self, actor):
-        #print(f"Searching for movie ids for actor id: {actor}")
-        url = f"https://www.imdb.com/search/title/?role={actor.id}&sort=boxoffice_gross_us,desc"
-        #print(url)
-        soup = BeautifulSoup(requests.get(url).text, 'html.parser')
+        soup = BeautifulSoup(requests.get(actor.movie_search_url).text, 'html.parser')
         movie_aggregate = soup.find_all("div", {"class": "lister-item mode-advanced"})
         movies = [Movie(get_movie_id(movie)) for movie in movie_aggregate[:10]]
         self.network.update({actor: movies})

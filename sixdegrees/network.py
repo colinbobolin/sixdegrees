@@ -27,6 +27,7 @@ class Network:
             self.load_more_actors()
         path_const = self.get_path()
         print([db.get_name(elem) for elem in path_const])
+        self.path = [db.get_name(elem) for elem in path_const]
 
     def load_more_actors(self):
         print("loading more actors.")

@@ -12,5 +12,12 @@
     <input type="text" placeholder="end" name="end" required>
     <br>
     <input type="submit" value="GO">
-</form>
+    </form>
+    {% if network %}
+        <ul>
+            {% for elem in network.path %}
+                <li>{{ elem }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endblock %}

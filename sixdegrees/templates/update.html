@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block header %}
+    <h1>{% block title %}Update{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>Update the database with an actor</p>
+    <form action="" method="post" role="form">
+    <label for="actor">Actor</label>
+    <input type="text" placeholder="Actor" name="actor" required>
+    <br>
+    <input type="submit" value="Update">
+    </form>
+    {% if movies %}
+        <ul>
+        {% for elem in movies %}
+            <li>{{ elem }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

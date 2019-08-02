@@ -79,14 +79,14 @@ def transfer_data_to_db():
 
 
 def get_movies(nconst):
-    db_update.update_filmography_if_not_updated(nconst)
+    #db_update.update_filmography_if_not_updated(nconst)
     results = query_db('SELECT tconst FROM Movie_Cast WHERE nconst=?;', [nconst])[:10]
     movies = [tconst for tconst in [movie_row['tconst'] for movie_row in results]]
     return movies
 
 
 def get_actors(tconst):
-    db_update.update_cast_if_not_updated(tconst)
+    #db_update.update_cast_if_not_updated(tconst)
     results = query_db('SELECT nconst FROM Movie_Cast WHERE tconst=?;', [tconst])[:10]
     actors = [nconst for nconst in [actor['nconst'] for actor in results]]
     return actors

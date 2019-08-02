@@ -25,22 +25,26 @@ def update_filmography_if_not_updated(nconst):
             update_filmography(nconst)
 
 
-def update_cast_list(tconst, number_of_actors=10):
+def update_cast_list(tconst):
     print(f"updating cast list for {tconst}")
-    cast_list = get_cast_list_from_web(tconst)[:number_of_actors]
+    cast_list = get_cast_list_from_web(tconst)
     for cast_item in cast_list:
         add_cast_member(tconst=cast_item.tconst,
                         nconst=cast_item.nconst)
     set_updated_date(tconst=tconst)
 
 
-def update_filmography(nconst, number_of_movies=10):
+def update_filmography(nconst):
     print(f"updating filmography for {nconst}")
-    filmography = get_filmography_from_web(nconst)[:number_of_movies]
+    movies = []
+    filmography = get_filmography_from_web(nconst)
     for film_item in filmography:
         add_cast_member(tconst=film_item.tconst,
                         nconst=film_item.nconst)
+        title = db.query_db('SELECT title FROM Movies WHERE tconst=?', [film_item.tconst])[0]['title']
+        movies.append(title)
     set_updated_date(nconst=nconst)
+    return movies
 
 
 def add_cast_member(tconst, nconst):
@@ -78,7 +82,7 @@ def get_filmography_from_web(nconst):
     url = f"https://www.imdb.com/search/title/?roles={nconst}&sort=boxoffice_gross_us,desc"
     soup = BeautifulSoup(requests.get(url).text, 'html.parser')
     lister_items = soup.find_all("div", {"class": "lister-item mode-advanced"})
-    for item in lister_items[:10]:
+    for item in lister_items:
         tconst = parse_tconst(item)
         filmography.append(CastItem(tconst=tconst,
                                     nconst=nconst))

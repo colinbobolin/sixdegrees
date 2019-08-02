@@ -2,6 +2,7 @@ from sixdegrees import app
 from sixdegrees.network import Network
 from flask import render_template, request, redirect
 from sixdegrees import db
+from sixdegrees import db_update
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -17,3 +18,15 @@ def index():
         return render_template('game.html', network=network)
 
     return render_template('game.html')
+
+
+@app.route('/update', methods=('GET', 'POST'))
+def update():
+    if request.method == 'POST':
+        # TODO store that actor's movies in the database.
+        actor = request.form['actor']
+        nconst = db.query_db(f"SELECT nconst from Actors where name=?", [actor])[0]['nconst']
+        movies = db_update.update_filmography(nconst)
+        return render_template('update.html', movies=movies)
+
+    return render_template('update.html')

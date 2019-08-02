@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block header %}
+    <h1>{% block title %}New Game{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>Pick two actors and select GO to see how they are connected!</p>
+    <form action="" method="post" role="form">
+    <label for="start">First Actor</label>
+    <input type="text" placeholder="start" name="start" required>
+    <label for="end">Second Actor</label>
+    <input type="text" placeholder="end" name="end" required>
+    <br>
+    <input type="submit" value="GO">
+</form>
+{% endblock %}

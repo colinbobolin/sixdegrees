@@ -1,8 +1,8 @@
-from sixdegrees.db import get_db, query_db
+from sixdegrees.db import query_db
 from sixdegrees.network import Network
-from sixdegrees.db_update import update_filmography
+#from sixdegrees.db_update import update_filmography
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    Blueprint, render_template, request
 )
 
 bp = Blueprint('game', __name__, url_prefix='/game')
@@ -29,7 +29,7 @@ def update():
         # TODO store that actor's movies in the database.
         actor = request.form['actor']
         nconst = query_db(f"SELECT nconst from Actors where name=?", [actor])[0]['nconst']
-        movies = update_filmography(nconst)
+        #movies = update_filmography(nconst)
         return render_template('game/update.html', movies=movies)
 
     return render_template('game/update.html')

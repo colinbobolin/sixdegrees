@@ -4,14 +4,24 @@ DROP TABLE IF EXISTS Movie_Cast;
 
 CREATE TABLE Actors (
     nconst TEXT PRIMARY KEY,
-    name TEXT,
+    primaryName TEXT,
+    birthYear TEXT,
+    deathYear TEXT,
+    primaryProfession TEXT,
+    knownForTitles TEXT,
     updated TEXT
 );
 
 CREATE TABLE Movies (
     tconst TEXT PRIMARY KEY,
-    title TEXT,
-    year INTEGER,
+    titleType TEXT,
+    primaryTitle TEXT,
+    originalTitle TEXT,
+    isAdult INTEGER,
+    startYear TEXT,
+    endYear TEXT,
+    runtimeMinutes Text,
+    genres TEXT,
     updated TEXT
 );
 
@@ -20,3 +30,4 @@ CREATE TABLE Movie_Cast (
     tconst REFERENCES Movies (tconst),
     PRIMARY KEY (nconst, tconst)
 );
+

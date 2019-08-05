@@ -2,11 +2,10 @@ import sqlite3
 from flask import g, current_app
 from flask.cli import with_appcontext
 import click
-from sixdegrees import db_update
-from pathlib import Path
 import requests
 import pandas as pd
-from datetime import date
+import os
+from sixdegrees.web_scraper import get_filmography_from_web
 
 
 def get_db():
@@ -33,7 +32,7 @@ def init_db():
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
-    db_update.init_movies_and_actors()
+    init_movies_and_actors()
 
 
 @click.command('init-db')
@@ -47,25 +46,28 @@ def init_db_command():
 def init_app(app):
     app.teardown_request(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(init_top_250_actors_movies)
 
 
 def query_db(query, args=(), one=False):
-    cur = g.db.execute(query, args)
+    db = get_db()
+    cur = db.execute(query, args)
     rv = [dict((cur.description[idx][0], value)
                for idx, value in enumerate(row)) for row in cur.fetchall()]
     return (rv[0] if rv else None) if one else rv
 
 
 def modify_db(query, args=()):
-    cur = g.db.execute(query, args)
+    db = get_db()
+    cur = db.execute(query, args)
     rv = [dict((cur.description[idx][0], value)
                for idx, value in enumerate(row)) for row in cur.fetchall()]
-    g.db.commit()
+    db.commit()
     return rv
 
 
 def get_movies(nconst):
-    results = query_db('SELECT tconst FROM Movie_Cast WHERE nconst=?;', [nconst])[:10]
+    results = query_db('SELECT tconst FROM Movie_Cast WHERE nconst=?;', [nconst])
     movies = [tconst for tconst in [movie_row['tconst'] for movie_row in results]]
     return movies
 
@@ -83,3 +85,69 @@ def get_name(const):
     if const[0] == 't':
         query = query_db('SELECT primaryTitle FROM Movies WHERE tconst=?', [const])
         return query[0]['primaryTitle']
+
+
+def add_movie_cast_entry(tconst, nconst):
+    modify_db("INSERT OR IGNORE INTO Movie_Cast (tconst, nconst) VALUES (?,?)",
+                 [tconst, nconst])
+
+
+def set_updated_date(tconst=None, nconst=None):
+    if tconst:
+        modify_db("UPDATE Movies SET updated=DATE('now') WHERE tconst=?", [tconst])
+    if nconst:
+        modify_db("UPDATE Actors SET updated=DATE('now') WHERE nconst=?", [nconst])
+
+
+def init_movies_and_actors():
+    init_table_from_web('https://datasets.imdbws.com/name.basics.tsv.gz', 'Actors')
+    init_table_from_web('https://datasets.imdbws.com/title.basics.tsv.gz', 'Movies')
+
+
+def init_table_from_web(url, table):
+    transfer_csv_to_db(csv_file=pull_csv(url, url.split('/')[-1]), db_table_name=table)
+
+
+def pull_csv(url, dest_filename):
+    r = requests.get(url)
+    path = os.path.join(os.getcwd(), 'temp', dest_filename)
+    with open(path, 'wb') as fd:
+        for chunk in r.iter_content(chunk_size=512):
+            fd.write(chunk)
+    print("Data file pulled")
+    return path
+
+
+def transfer_csv_to_db(csv_file, db_table_name):
+    reader = pd.read_csv(csv_file, sep='\t', chunksize=1000)
+    with get_db() as database:
+        for chunk in reader:
+            chunk.to_sql(db_table_name, con=database, if_exists='append', index=False)
+    print("Data transferred to database")
+
+
+def get_top_250_nconst():
+    path = os.path.join(os.getcwd(), 'temp', 'top_250_nconst')
+    if not os.path.isfile(path):
+        csv_url = 'https://www.imdb.com/list/ls000004615/export?ref_=nmls_otexp'
+        r = requests.get(csv_url)
+        file = open(path, 'wb')
+        file.write(r.content)
+    df = pd.read_csv(path, encoding='ISO-8859-1')
+    top_250_nconst = df['Const'].values
+    return top_250_nconst
+
+
+@click.command('init-top-250-actors-movies')
+@with_appcontext
+def init_top_250_actors_movies():
+    nconsts = get_top_250_nconst()
+    for nconst in nconsts:
+        update_filmography(nconst)
+
+
+def update_filmography(nconst):
+    filmography = get_filmography_from_web(nconst)
+    for cast_item in filmography:
+        add_movie_cast_entry(tconst=cast_item.tconst, nconst=cast_item.nconst)
+    return filmography

@@ -1,6 +1,5 @@
-from sixdegrees.db import query_db
+from sixdegrees.db import query_db, update_filmography
 from sixdegrees.network import Network
-#from sixdegrees.db_update import update_filmography
 from flask import (
     Blueprint, render_template, request
 )
@@ -13,8 +12,8 @@ def play():
     if request.method == 'POST':
         start = request.form['start']
         end = request.form['end']
-        start_nconst = query_db(f"SELECT nconst from Actors where name=?", [start])[0]['nconst']
-        end_nconst = query_db(f"SELECT nconst from Actors where name=?", [end])[0]['nconst']
+        start_nconst = query_db(f"SELECT nconst from Actors where primaryName=?", [start])[0]['nconst']
+        end_nconst = query_db(f"SELECT nconst from Actors where primaryName=?", [end])[0]['nconst']
         network = Network(start_nconst, end_nconst)
         path = network.get_path()
         print(f"path is: {path}")
@@ -26,10 +25,9 @@ def play():
 @bp.route('/update', methods=('GET', 'POST'))
 def update():
     if request.method == 'POST':
-        # TODO store that actor's movies in the database.
         actor = request.form['actor']
-        nconst = query_db(f"SELECT nconst from Actors where name=?", [actor])[0]['nconst']
-        #movies = update_filmography(nconst)
+        nconst = query_db(f"SELECT nconst from Actors where primaryName=?", [actor])[0]['nconst']
+        movies = update_filmography(nconst)
         return render_template('game/update.html', movies=movies)
 
     return render_template('game/update.html')

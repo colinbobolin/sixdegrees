@@ -25,12 +25,15 @@ def get_filmography_from_web(nconst):
     filmography = []
     CastItem = namedtuple('CastItem', 'tconst nconst')
     url = f"https://www.imdb.com/search/title/?roles={nconst}&sort=boxoffice_gross_us,desc"
-    soup = BeautifulSoup(requests.get(url).text, 'html.parser')
-    lister_items = soup.find_all("div", {"class": "lister-item mode-advanced"})
-    for item in lister_items:
-        tconst = parse_tconst(item)
-        filmography.append(CastItem(tconst=tconst,
-                                    nconst=nconst))
+    try:
+        soup = BeautifulSoup(requests.get(url).text, 'html.parser')
+        lister_items = soup.find_all("div", {"class": "lister-item mode-advanced"})
+        for item in lister_items:
+            tconst = parse_tconst(item)
+            filmography.append(CastItem(tconst=tconst,
+                                        nconst=nconst))
+    except ConnectionError:
+        print(f'Connection error when retrieving {nconst}\'s movies. Continuing')
     return filmography
 
 

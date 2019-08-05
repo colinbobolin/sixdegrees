@@ -1,0 +1,6 @@
+include sixdegrees/schema.sql
+graft sixdegrees/static
+graft sixdegrees/templates
+global-exclude *.pycraft sixdegrees/static
+graft sixdegrees/templates
+global-exclude *.pyc

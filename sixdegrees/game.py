@@ -17,8 +17,11 @@ def play():
         end_nconst = query_db(f"SELECT nconst from Actors where primaryName=?", [end])[0]['nconst']
         #network = Network(start_nconst, end_nconst)
         #path = network.calc_path()
-        network = net.get_path(start_nconst, end_nconst)
-        return render_template('game/play.html', network=network)
+        path_const = net.get_path(start_nconst, end_nconst)
+        #print(path_const)
+        path = net.get_path_representation(path_const)
+        #print(path)
+        return render_template('game/play.html', network=path)
 
     return render_template('game/play.html')
 

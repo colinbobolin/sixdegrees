@@ -131,18 +131,18 @@ def update_filmography(nconst):
 
 def get_direct_relationship(nconst1, nconst2):
     """returns list of tconst strings representing the movies that connect the two actors"""
-    results = query_db("SELECT tconst FROM Movie_Cast WHERE nconst=? AND tconst IN ("
-                       "SELECT tconst FROM Movie_Cast WHERE nconst=?)",
+    results = query_db("SELECT tconst FROM Movie_Cast WHERE nconst=? AND tconst IN ( \
+                       SELECT tconst FROM Movie_Cast WHERE nconst=?)",
                        [nconst1, nconst2])
     return [result['tconst'] for result in results]
 
 
 def get_connected_actors(nconst):
     """returns list of nconst strings for actors who share at least one movie with the nconst param"""
-    print(f'getting connected actors for {nconst}')
+    #print(f'getting connected actors for {nconst}')
     results = query_db("SELECT DISTINCT nconst FROM Movie_Cast WHERE tconst IN ( \
                        SELECT tconst FROM Movie_Cast WHERE nconst=?)",
                        [nconst])
-    for result in results:
-        print(result)
+    #or result in results:
+        #print(result)
     return [result['nconst'] for result in results]

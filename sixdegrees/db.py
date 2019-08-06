@@ -127,3 +127,10 @@ def update_filmography(nconst):
     for cast_item in filmography:
         add_movie_cast_entry(tconst=cast_item.tconst, nconst=cast_item.nconst)
     return filmography
+
+
+def get_direct_connection(nconst1, nconst2):
+    return query_db("SELECT tconst FROM Movie_Cast WHERE nconst=? AND tconst IN "
+                    "(SELECT tconst FROM Movie_Cast WHERE nconst=?)",
+                    [nconst1, nconst2], one=True)['tconst']
+

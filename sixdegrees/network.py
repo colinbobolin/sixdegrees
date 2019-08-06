@@ -14,26 +14,21 @@ class Network:
         """start and target are nconst for each actor"""
         self.start = start
         self.end = end
-        #print(f"new network created for {self.start} -> {self.end}")
         self.searched = []
         self.unsearched_actors = deque([self.start])
         self.unsearched_movies = deque()
         self.network = get_network()
         self.network.update({self.start: None})
-        #print("Thinking hard about this one... please wait.")
         self.found = False
         while not self.found:
             self.load_more_movies()
             self.load_more_actors()
-        path_const = self.get_path()
-        #print([db.get_name(elem) for elem in path_const])
+        path_const = self.calc_path()
         self.path = [db.get_name(elem) for elem in path_const]
 
     def load_more_actors(self):
-        #print("loading more actors.")
         while self.unsearched_movies:
             tconst = self.unsearched_movies.popleft()
-           #print(f"loading actors for {tconst}")
             actors = db.get_actors(tconst)
             get_network().update({tconst: actors})
             if self.end in actors:
@@ -45,7 +40,6 @@ class Network:
             self.searched.append(tconst)
 
     def load_more_movies(self):
-        # print(f"loading more movies")
         while self.unsearched_actors:
             nconst = self.unsearched_actors.popleft()
             movies = db.get_movies(nconst)
@@ -57,7 +51,7 @@ class Network:
                     pass
             self.searched.append(nconst)
 
-    def get_path(self):
+    def calc_path(self):
         dq = deque()
         dq.append([self.start])
         while dq:

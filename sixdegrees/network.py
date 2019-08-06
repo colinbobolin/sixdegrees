@@ -65,6 +65,19 @@ class Network:
                 dq.append(new_path)
 
 
+def get_path(nconst1, nconst2):
+    dq = deque()
+    dq.append([nconst1])
+    while dq:
+        path = dq.popleft()
+        node = path[-1]
+        if node == nconst2:
+            return path
+        for adjacent in db.get_connected_actors(node):
+            new_path = list(path)
+            new_path.append(adjacent)
+            dq.append(new_path)
+
 
 
 

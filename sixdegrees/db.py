@@ -4,6 +4,7 @@ from flask.cli import with_appcontext
 import click
 import pandas as pd
 from sixdegrees.web_scraper import get_filmography_from_web
+import os
 
 
 def get_db():
@@ -30,8 +31,6 @@ def init_db():
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
-    init_movies_and_actors()
-
 
 @click.command('init-db')
 @with_appcontext
@@ -44,7 +43,7 @@ def init_db_command():
 def init_app(app):
     app.teardown_request(close_db)
     app.cli.add_command(init_db_command)
-    app.cli.add_command(init_top_actors_movies)
+    app.cli.add_command(init_connections)
 
 
 def query_db(query, args=(), one=False):
@@ -97,6 +96,16 @@ def set_updated_date(tconst=None, nconst=None):
         modify_db("UPDATE Actors SET updated=DATE('now') WHERE nconst=?", [nconst])
 
 
+@click.command('init-connections')
+@with_appcontext
+def init_connections():
+    init_movies_and_actors()
+    nconsts = get_top_nconsts()
+    for nconst in nconsts:
+        update_filmography(nconst)
+        modify_db("UPDATE Actors SET updated=DATE('now') WHERE nconst=?", [nconst])
+
+
 def init_movies_and_actors():
     mappings = [('https://datasets.imdbws.com/name.basics.tsv.gz', 'Actors'),
                 ('https://datasets.imdbws.com/title.basics.tsv.gz', 'Movies')]
@@ -111,15 +120,6 @@ def get_top_nconsts():
     df = pd.read_csv('https://www.imdb.com/list/ls058011111/export?ref_=nmls_otexp', encoding='ISO-8859-1')
     top_nconst = df['Const'].values
     return top_nconst
-
-
-@click.command('init-top-actors-movies')
-@with_appcontext
-def init_top_actors_movies():
-    nconsts = get_top_nconsts()
-    for nconst in nconsts:
-        update_filmography(nconst)
-        modify_db("UPDATE Actors SET updated=DATE('now') WHERE nconst=?", [nconst])
 
 
 def update_filmography(nconst):

@@ -1,5 +1,4 @@
 from sixdegrees.db import query_db, update_filmography
-from sixdegrees.network import Network
 from flask import (
     Blueprint, render_template, request
 )
@@ -15,12 +14,8 @@ def play():
         end = request.form['end']
         start_nconst = query_db(f"SELECT nconst from Actors where primaryName=?", [start])[0]['nconst']
         end_nconst = query_db(f"SELECT nconst from Actors where primaryName=?", [end])[0]['nconst']
-        #network = Network(start_nconst, end_nconst)
-        #path = network.calc_path()
         path_const = net.get_path(start_nconst, end_nconst)
-        #print(path_const)
         path = net.get_path_representation(path_const)
-        #print(path)
         return render_template('game/play.html', network=path)
 
     return render_template('game/play.html')

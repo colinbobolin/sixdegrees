@@ -1,5 +1,4 @@
 from collections import deque
-from flask import g
 from sixdegrees import db
 
 

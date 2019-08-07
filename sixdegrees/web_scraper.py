@@ -4,11 +4,12 @@ import requests
 import re
 from datetime import date
 
+CastItem = namedtuple('CastItem', 'tconst nconst')
+
 
 def get_cast_list_from_web(tconst):
     """Returns a list of namedtuple('CastItem', 'tconst nconst')"""
     cast_list = []
-    CastItem = namedtuple('CastItem', 'tconst nconst')
     url = f"https://www.imdb.com/search/name/?roles={tconst}&sort=starmeter,asc"
     soup = BeautifulSoup(requests.get(url).text, 'html.parser')
     lister_items = soup.find_all("div", {"class": "lister-item mode-detail"})
@@ -24,7 +25,6 @@ def get_cast_list_from_web(tconst):
 def get_filmography_from_web(nconst):
     """Returns a list of namedtuple('CastItem', 'tconst nconst')"""
     filmography = []
-    CastItem = namedtuple('CastItem', 'tconst nconst')
     url = f'https://www.imdb.com/search/title/' \
         f'?title_type=feature&release_date=,{date.today()}&role={nconst}&view=simple&count=250'
     try:

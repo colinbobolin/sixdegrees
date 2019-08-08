@@ -1,1 +1,1 @@
-web: gunicorn sixdegrees:app
+web: gunicorn "sixdegrees:create_app()"

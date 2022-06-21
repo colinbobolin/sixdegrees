@@ -21,7 +21,7 @@ lxml==4.4.0
 Mako==1.0.14
 MarkupSafe==1.1.1
 more-itertools==7.2.0
-numpy==1.16.4
+numpy==1.22.0
 packaging==19.1
 pandas==0.25.0
 pluggy==0.12.0
